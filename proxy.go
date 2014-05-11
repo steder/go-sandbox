@@ -8,6 +8,10 @@ package main
 import "fmt"
 import "io"
 import "net"
+import "os"
+
+var upstream_host string
+var upstream_port string;
 
 
 func handleUpstream(conn net.Conn, upstream net.Conn) {
@@ -17,7 +21,7 @@ func handleUpstream(conn net.Conn, upstream net.Conn) {
 
 
 func handleConnection(conn net.Conn) {
-	upstream, err := net.Dial("tcp", "google.com:80")
+	upstream, err := net.Dial("tcp", upstream_host + ":" + upstream_port)
 	if err != nil {
 		fmt.Println("Couldn't connect to upstream")
 	}
@@ -27,6 +31,16 @@ func handleConnection(conn net.Conn) {
 
 
 func main() {
+    var args = os.Args
+    if len(args) >= 3 {
+        upstream_host = args[1]
+        upstream_port = args[2]
+        fmt.Println("host:port = %s:%s", upstream_host, upstream_port)
+    } else {
+        upstream_host = "google.com"
+        upstream_port = "80"
+    }
+
 	ln, err := net.Listen("tcp", ":8080")
 	fmt.Println("Listening")
 	if err != nil {
